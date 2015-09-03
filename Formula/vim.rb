@@ -35,6 +35,14 @@ class Vim < Formula
   conflicts_with "ex-vi",
     :because => "vim and ex-vi both install bin/ex and bin/view"
 
+  # This patch was authored by Yegappan.
+  # It adds adds four commands to Vim: :cdo, :cfdo, :ldo, and :lfdo
+  # https://groups.google.com/d/msg/vim_dev/dfyt-G6SMec/fYjv0Afq1l4J
+  patch do
+    url "https://raw.githubusercontent.com/nelstrom/homebrew-vim/master/patches/cdo.diff"
+    sha265 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
+  end
+
   def install
     ENV["LUA_PREFIX"] = HOMEBREW_PREFIX if build.with?("lua") || build.with?("luajit")
 
@@ -72,14 +80,6 @@ class Vim < Formula
     if build.with? "luajit"
       opts << "--with-luajit"
       opts << "--enable-luainterp"
-    end
-
-    # This patch was authored by Yegappan.
-    # It adds adds four commands to Vim: :cdo, :cfdo, :ldo, and :lfdo
-    # https://groups.google.com/d/msg/vim_dev/dfyt-G6SMec/fYjv0Afq1l4J
-    patch do
-      url "https://raw.githubusercontent.com/nelstrom/homebrew-vim/master/patches/cdo.diff"
-      sha265 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
     end
 
     # XXX: Please do not submit a pull request that hardcodes the path
