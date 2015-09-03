@@ -14,6 +14,7 @@ class Vim < Formula
   option "override-system-vi", "Override system vi"
   option "disable-nls", "Build vim without National Language Support (translated messages, keymaps)"
   option "with-client-server", "Enable client/server mode"
+  option "cdo", "Include :cdo, :cfdo, :ldo, and :lfdo commands"
 
   LANGUAGES_OPTIONAL = %w[lua mzscheme python3 tcl]
   LANGUAGES_DEFAULT  = %w[perl python ruby]
@@ -41,7 +42,7 @@ class Vim < Formula
   patch do
     url "https://raw.githubusercontent.com/nelstrom/homebrew-vim/master/patches/cdo.diff"
     sha265 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
-  end
+  end if build.with? "cdo"
 
   def install
     ENV["LUA_PREFIX"] = HOMEBREW_PREFIX if build.with?("lua") || build.with?("luajit")
