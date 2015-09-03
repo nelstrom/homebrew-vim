@@ -1,0 +1,1012 @@
+diff -r 8840c1ae3b50 runtime/doc/cmdline.txt
+--- a/runtime/doc/cmdline.txt	Wed Jul 22 22:46:14 2015 +0200
++++ b/runtime/doc/cmdline.txt	Fri Jul 24 20:23:43 2015 -0700
+@@ -511,6 +511,8 @@
+     :argdo
+     :autocmd
+     :bufdo
++    :cdo
++    :cfdo
+     :command
+     :cscope
+     :debug
+@@ -521,6 +523,8 @@
+     :help
+     :helpfind
+     :lcscope
++    :ldo
++    :lfdo
+     :make
+     :normal
+     :perl
+diff -r 8840c1ae3b50 runtime/doc/editing.txt
+--- a/runtime/doc/editing.txt	Wed Jul 22 22:46:14 2015 +0200
++++ b/runtime/doc/editing.txt	Fri Jul 24 20:23:43 2015 -0700
+@@ -857,7 +857,8 @@
+ 			each file.
+ 			{not in Vi} {not available when compiled without the
+ 			|+listcmds| feature}
+-			Also see |:windo|, |:tabdo| and |:bufdo|.
++			Also see |:windo|, |:tabdo|, |:bufdo|, |:cdo|, |:ldo|,
++			|:cfdo| and |:lfdo|
+ 
+ Example: >
+ 	:args *.c
+diff -r 8840c1ae3b50 runtime/doc/index.txt
+--- a/runtime/doc/index.txt	Wed Jul 22 22:46:14 2015 +0200
++++ b/runtime/doc/index.txt	Fri Jul 24 20:23:43 2015 -0700
+@@ -1138,6 +1138,8 @@
+ |:cc|		:cc		go to specific error
+ |:cclose|	:ccl[ose]	close quickfix window
+ |:cd|		:cd		change directory
++|:cdo|		:cdo		execute command in each valid error list entry
++|:cfdo|		:cfdo		execute command in each file in error list
+ |:center|	:ce[nter]	format lines at the center
+ |:cexpr|	:cex[pr]	read errors from expr and jump to first
+ |:cfile|	:cf[ile]	read file with error messages and jump to first
+@@ -1296,6 +1298,8 @@
+ |:lchdir|	:lch[dir]	change directory locally
+ |:lclose|	:lcl[ose]	close location window
+ |:lcscope|	:lcs[cope]      like ":cscope" but uses location list
++|:ldo|		:ld[o]		execute command in valid location list entries
++|:lfdo|		:lfd[o]		execute command in each file in location list
+ |:left|		:le[ft]		left align lines
+ |:leftabove|	:lefta[bove]	make split window appear left or above
+ |:let|		:let		assign a value to a variable or option
+diff -r 8840c1ae3b50 runtime/doc/quickfix.txt
+--- a/runtime/doc/quickfix.txt	Wed Jul 22 22:46:14 2015 +0200
++++ b/runtime/doc/quickfix.txt	Fri Jul 24 20:23:43 2015 -0700
+@@ -298,6 +298,108 @@
+ 
+ 	au QuickfixCmdPost make call QfMakeConv()
+ 
++EXECUTE A COMMAND IN ALL THE BUFFERS IN QUICKFIX OR LOCATION LIST:
++							*:cdo*
++:cdo[!] {cmd}		Execute {cmd} in each valid entry in the quickfix list.
++			It works like doing this: >
++				:cfirst
++				:{cmd}
++				:cnext
++				:{cmd}
++				etc.
++<			When the current file can't be |abandon|ed and the [!]
++			is not present, the command fails.
++			When an error is detected on one buffer, further
++			buffers will not be visited.
++			The last buffer (or where an error occurred) becomes
++			the current buffer.
++			{cmd} can contain '|' to concatenate several commands.
++			Only valid entries in the quickfix list are used.
++			Note: While this command is executing, the Syntax
++			autocommand event is disabled by adding it to
++			'eventignore'.  This considerably speeds up editing
++			each buffer.
++			{not in Vi} {not available when compiled without the
++			|+listcmds| feature}
++			Also see |:bufdo|, |:tabdo|, |:argdo|, |:windo|,
++			|:ldo|, |:cfdo| and |:lfdo|.
++
++							*:cfdo*
++:cfdo[!] {cmd}		Execute {cmd} in each file in the quickfix list.
++			It works like doing this: >
++				:cfirst
++				:{cmd}
++				:cnfile
++				:{cmd}
++				etc.
++<			When the current file can't be |abandon|ed and the [!]
++			is not present, the command fails.
++			When an error is detected on one buffer, further
++			buffers will not be visited.
++			The last buffer (or where an error occurred) becomes
++			the current buffer.
++			{cmd} can contain '|' to concatenate several commands.
++			Only valid entries in the quickfix list are used.
++			Note: While this command is executing, the Syntax
++			autocommand event is disabled by adding it to
++			'eventignore'.  This considerably speeds up editing
++			each buffer.
++			{not in Vi} {not available when compiled without the
++			|+listcmds| feature}
++			Also see |:bufdo|, |:tabdo|, |:argdo|, |:windo|,
++			|:cdo|, |:ldo| and |:lfdo|.
++
++							*:ldo*
++:ld[o][!] {cmd}		Execute {cmd} in each valid entry in the location list
++			for the current window.
++			It works like doing this: >
++				:lfirst
++				:{cmd}
++				:lnext
++				:{cmd}
++				etc.
++<			When the current file can't be |abandon|ed and the [!]
++			is not present, the command fails.
++			When an error is detected on one buffer, further
++			buffers will not be visited.
++			The last buffer (or where an error occurred) becomes
++			the current buffer.
++			{cmd} can contain '|' to concatenate several commands.
++			Only valid entries in the location list are used.
++			Note: While this command is executing, the Syntax
++			autocommand event is disabled by adding it to
++			'eventignore'.  This considerably speeds up editing
++			each buffer.
++			{not in Vi} {not available when compiled without the
++			|+listcmds| feature}
++			Also see |:bufdo|, |:tabdo|, |:argdo|, |:windo|,
++			|:cdo|, |:cfdo| and |:lfdo|.
++
++							*:lfdo*
++:lfdo[!] {cmd}		Execute {cmd} in each file in the location list for
++			the current window.
++			It works like doing this: >
++				:lfirst
++				:{cmd}
++				:lnfile
++				:{cmd}
++				etc.
++<			When the current file can't be |abandon|ed and the [!]
++			is not present, the command fails.
++			When an error is detected on one buffer, further
++			buffers will not be visited.
++			The last buffer (or where an error occurred) becomes
++			the current buffer.
++			{cmd} can contain '|' to concatenate several commands.
++			Only valid entries in the location list are used.
++			Note: While this command is executing, the Syntax
++			autocommand event is disabled by adding it to
++			'eventignore'.  This considerably speeds up editing
++			each buffer.
++			{not in Vi} {not available when compiled without the
++			|+listcmds| feature}
++			Also see |:bufdo|, |:tabdo|, |:argdo|, |:windo|,
++			|:cdo|, |:ldo| and |:cfdo|.
+ 
+ =============================================================================
+ 2. The error window					*quickfix-window*
+diff -r 8840c1ae3b50 runtime/doc/tabpage.txt
+--- a/runtime/doc/tabpage.txt	Wed Jul 22 22:46:14 2015 +0200
++++ b/runtime/doc/tabpage.txt	Fri Jul 24 20:23:43 2015 -0700
+@@ -248,7 +248,8 @@
+ 		{cmd} must not open or close tab pages or reorder them.
+ 		{not in Vi} {not available when compiled without the
+ 		|+listcmds| feature}
+-		Also see |:windo|, |:argdo| and |:bufdo|.
++		Also see |:windo|, |:argdo|, |:bufdo|, |:cdo|, |:ldo|, |:cfdo|
++		and |:lfdo|
+ 
+ ==============================================================================
+ 3. Other items						*tab-page-other*
+diff -r 8840c1ae3b50 runtime/doc/windows.txt
+--- a/runtime/doc/windows.txt	Wed Jul 22 22:46:14 2015 +0200
++++ b/runtime/doc/windows.txt	Fri Jul 24 20:23:43 2015 -0700
+@@ -715,7 +715,8 @@
+ 			{cmd} must not open or close windows or reorder them.
+ 			{not in Vi} {not available when compiled without the
+ 			|+listcmds| feature}
+-			Also see |:tabdo|, |:argdo| and |:bufdo|.
++			Also see |:tabdo|, |:argdo|, |:bufdo|, |:cdo|, |:ldo|,
++			|:cfdo| and |:lfdo|
+ 
+ 							*:bufdo*
+ :[range]bufdo[!] {cmd}	Execute {cmd} in each buffer in the buffer list or if
+@@ -743,7 +744,8 @@
+ 			each buffer.
+ 			{not in Vi} {not available when compiled without the
+ 			|+listcmds| feature}
+-			Also see |:tabdo|, |:argdo| and |:windo|.
++			Also see |:tabdo|, |:argdo|, |:windo|, |:cdo|, |:ldo|,
++			|:cfdo| and |:lfdo|
+ 
+ Examples: >
+ 
+diff -r 8840c1ae3b50 src/ex_cmds.h
+--- a/src/ex_cmds.h	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/ex_cmds.h	Fri Jul 24 20:23:43 2015 -0700
+@@ -65,6 +65,7 @@
+ #define ADDR_LOADED_BUFFERS	3
+ #define ADDR_BUFFERS		4
+ #define ADDR_TABS		5
++#define ADDR_QUICKFIX		6
+ 
+ #ifndef DO_DECLARE_EXCMD
+ typedef struct exarg exarg_T;
+@@ -270,6 +271,9 @@
+ EX(CMD_cd,		"cd",		ex_cd,
+ 			BANG|FILE1|TRLBAR|CMDWIN,
+ 			ADDR_LINES),
++EX(CMD_cdo,		"cdo",		ex_listdo,
++			BANG|NEEDARG|EXTRA|NOTRLCOM|RANGE|NOTADR|DFLALL,
++			ADDR_QUICKFIX),
+ EX(CMD_center,		"center",	ex_align,
+ 			TRLBAR|RANGE|WHOLEFOLD|EXTRA|CMDWIN|MODIFY,
+ 			ADDR_LINES),
+@@ -279,6 +283,11 @@
+ EX(CMD_cfile,		"cfile",	ex_cfile,
+ 			TRLBAR|FILE1|BANG,
+ 			ADDR_LINES),
++/* Even though 'cfdo' is alphabetically lower than 'cfile', it is after 'cfile'
++ * in this cmd list to support the existing ":cf" abbreviation */
++EX(CMD_cfdo,		"cfdo",		ex_listdo,
++			BANG|NEEDARG|EXTRA|NOTRLCOM|RANGE|NOTADR|DFLALL,
++			ADDR_QUICKFIX),
+ EX(CMD_cfirst,		"cfirst",	ex_cc,
+ 			RANGE|NOTADR|COUNT|TRLBAR|BANG,
+ 			ADDR_LINES),
+@@ -729,6 +738,9 @@
+ EX(CMD_lcscope,		"lcscope",	do_cscope,
+ 			EXTRA|NOTRLCOM|XFILE,
+ 			ADDR_LINES),
++EX(CMD_ldo,		"ldo",		ex_listdo,
++			BANG|NEEDARG|EXTRA|NOTRLCOM|RANGE|NOTADR|DFLALL,
++			ADDR_QUICKFIX),
+ EX(CMD_left,		"left",		ex_align,
+ 			TRLBAR|RANGE|WHOLEFOLD|EXTRA|CMDWIN|MODIFY,
+ 			ADDR_LINES),
+@@ -744,6 +756,11 @@
+ EX(CMD_lfile,		"lfile",	ex_cfile,
+ 			TRLBAR|FILE1|BANG,
+ 			ADDR_LINES),
++/* Even though 'lfdo' is alphabetically lower than 'lfile', it is after 'lfile'
++ * in this cmd list to support the existing ":lf" abbreviation */
++EX(CMD_lfdo,		"lfdo",		ex_listdo,
++			BANG|NEEDARG|EXTRA|NOTRLCOM|RANGE|NOTADR|DFLALL,
++			ADDR_QUICKFIX),
+ EX(CMD_lfirst,		"lfirst",	ex_cc,
+ 			RANGE|NOTADR|COUNT|TRLBAR|BANG,
+ 			ADDR_LINES),
+diff -r 8840c1ae3b50 src/ex_cmds2.c
+--- a/src/ex_cmds2.c	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/ex_cmds2.c	Fri Jul 24 20:23:43 2015 -0700
+@@ -2429,7 +2429,7 @@
+ }
+ 
+ /*
+- * ":argdo", ":windo", ":bufdo", ":tabdo"
++ * ":argdo", ":windo", ":bufdo", ":tabdo", ":cdo", ":ldo", ":cfdo" and ":lfdo"
+  */
+     void
+ ex_listdo(eap)
+@@ -2446,6 +2446,10 @@
+     char_u	*save_ei = NULL;
+ #endif
+     char_u	*p_shm_save;
++#ifdef FEAT_QUICKFIX
++    int		qf_size;
++    int		qf_idx;
++#endif
+ 
+ #ifndef FEAT_WINDOWS
+     if (eap->cmdidx == CMD_windo)
+@@ -2510,6 +2514,24 @@
+             if (buf != NULL)
+ 		goto_buffer(eap, DOBUF_FIRST, FORWARD, buf->b_fnum);
+         }
++#ifdef FEAT_QUICKFIX
++	else if (eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo ||
++		eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo)
++	{
++	    qf_size = qf_get_size(eap);
++	    if (qf_size <= 0 || eap->line1 > qf_size)
++		buf = NULL;
++	    else
++	    {
++		ex_cc(eap);
++
++		buf = curbuf;
++		i = eap->line1 - 1;
++		if (eap->addr_count <= 0)
++		    eap->line2 = qf_size;   /* default is all the quickfix/location list entries */
++	    }
++	}
++#endif
+ 	else
+ 	    setpcmark();
+ 	listcmd_busy = TRUE;	    /* avoids setting pcmark below */
+@@ -2600,6 +2622,23 @@
+ 		    break;
+ 	    }
+ 
++#ifdef FEAT_QUICKFIX
++	    if (eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo ||
++		    eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo)
++	    {
++		if (i >= qf_size || i >= eap->line2)
++		    break;
++
++		qf_idx = qf_get_cur_idx(eap);
++
++		ex_cnext(eap);
++
++		/* If jumping to the next quickfix entry fails, quit here */
++		if (qf_get_cur_idx(eap) == qf_idx)
++		    break;
++	    }
++#endif
++
+ 	    if (eap->cmdidx == CMD_windo)
+ 	    {
+ 		validate_cursor();	/* cursor may have moved */
+diff -r 8840c1ae3b50 src/ex_docmd.c
+--- a/src/ex_docmd.c	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/ex_docmd.c	Fri Jul 24 20:23:43 2015 -0700
+@@ -135,7 +135,7 @@
+ #endif
+ 
+ static int	check_more __ARGS((int, int));
+-static linenr_T get_address __ARGS((char_u **, int addr_type, int skip, int to_other_file));
++static linenr_T get_address __ARGS((exarg_T *, char_u **, int addr_type, int skip, int to_other_file));
+ static void	get_flags __ARGS((exarg_T *eap));
+ #if !defined(FEAT_PERL) \
+ 	|| !defined(FEAT_PYTHON) || !defined(FEAT_PYTHON3) \
+@@ -2173,9 +2173,12 @@
+ 		lnum = CURRENT_TAB_NR;
+ 		ea.line2 = lnum;
+ 		break;
++	    case ADDR_QUICKFIX:
++		ea.line2 = qf_get_cur_valid_idx(&ea);
++		break;
+ 	}
+ 	ea.cmd = skipwhite(ea.cmd);
+-	lnum = get_address(&ea.cmd, ea.addr_type, ea.skip, ea.addr_count == 0);
++	lnum = get_address(&ea, &ea.cmd, ea.addr_type, ea.skip, ea.addr_count == 0);
+ 	if (ea.cmd == NULL)		    /* error detected */
+ 	    goto doend;
+ 	if (lnum == MAXLNUM)
+@@ -2233,6 +2236,12 @@
+ 			    ea.line2 = ARGCOUNT;
+ 			}
+ 			break;
++		    case ADDR_QUICKFIX:
++			ea.line1 = 1;
++			ea.line2 = qf_get_size(&ea);
++			if (ea.line2 == 0)
++			    ea.line2 = 1;
++			break;
+ 		}
+ 		++ea.addr_count;
+ 	    }
+@@ -2692,6 +2701,11 @@
+ 		else
+ 		    ea.line2 = ARGCOUNT;
+ 		break;
++	    case ADDR_QUICKFIX:
++		ea.line2 = qf_get_size(&ea);
++		if (ea.line2 == 0)
++		    ea.line2 = 1;
++		break;
+ 	}
+     }
+ 
+@@ -3838,6 +3852,8 @@
+ 	case CMD_botright:
+ 	case CMD_browse:
+ 	case CMD_bufdo:
++	case CMD_cdo:
++	case CMD_cfdo:
+ 	case CMD_confirm:
+ 	case CMD_debug:
+ 	case CMD_folddoclosed:
+@@ -3847,7 +3863,9 @@
+ 	case CMD_keepjumps:
+ 	case CMD_keepmarks:
+ 	case CMD_keeppatterns:
++	case CMD_ldo:
+ 	case CMD_leftabove:
++	case CMD_lfdo:
+ 	case CMD_lockmarks:
+ 	case CMD_noautocmd:
+ 	case CMD_noswapfile:
+@@ -4320,7 +4338,8 @@
+  * Return MAXLNUM when no Ex address was found.
+  */
+     static linenr_T
+-get_address(ptr, addr_type, skip, to_other_file)
++get_address(eap, ptr, addr_type, skip, to_other_file)
++    exarg_T	*eap;
+     char_u	**ptr;
+     int		addr_type;  /* flag: one of ADDR_LINES, ... */
+     int		skip;	    /* only skip the address, don't use it */
+@@ -4361,6 +4380,9 @@
+ 		    case ADDR_TABS:
+ 			lnum = CURRENT_TAB_NR;
+ 			break;
++		    case ADDR_QUICKFIX:
++			lnum = qf_get_cur_valid_idx(eap);
++			break;
+ 		}
+ 		break;
+ 
+@@ -4393,6 +4415,11 @@
+ 		    case ADDR_TABS:
+ 			lnum = LAST_TAB_NR;
+ 			break;
++		    case ADDR_QUICKFIX:
++			lnum = qf_get_size(eap);
++			if (lnum == 0)
++			    lnum = 1;
++			break;
+ 		}
+ 		break;
+ 
+@@ -4565,6 +4592,9 @@
+ 		    case ADDR_TABS:
+ 			lnum = CURRENT_TAB_NR;
+ 			break;
++		    case ADDR_QUICKFIX:
++			lnum = qf_get_cur_valid_idx(eap);
++			break;
+ 		}
+ 	    }
+ 
+@@ -4703,6 +4733,10 @@
+ 		if (eap->line2 > LAST_TAB_NR)
+ 		    return (char_u *)_(e_invrange);
+ 		break;
++	    case ADDR_QUICKFIX:
++		if (eap->line2 != 1 && eap->line2 > qf_get_size(eap))
++		    return (char_u *)_(e_invrange);
++		break;
+ 	}
+     }
+     return NULL;
+@@ -5813,6 +5847,7 @@
+     {ADDR_TABS, "tabs"},
+     {ADDR_BUFFERS, "buffers"},
+     {ADDR_WINDOWS, "windows"},
++    {ADDR_QUICKFIX, "quickfix"},
+     {-1, NULL}
+ };
+ #endif
+@@ -9220,7 +9255,7 @@
+ {
+     long	n;
+ 
+-    n = get_address(&eap->arg, eap->addr_type, FALSE, FALSE);
++    n = get_address(eap, &eap->arg, eap->addr_type, FALSE, FALSE);
+     if (eap->arg == NULL)	    /* error detected */
+     {
+ 	eap->nextcmd = NULL;
+diff -r 8840c1ae3b50 src/proto/quickfix.pro
+--- a/src/proto/quickfix.pro	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/proto/quickfix.pro	Fri Jul 24 20:23:43 2015 -0700
+@@ -27,4 +27,7 @@
+ void ex_cbuffer __ARGS((exarg_T *eap));
+ void ex_cexpr __ARGS((exarg_T *eap));
+ void ex_helpgrep __ARGS((exarg_T *eap));
++int qf_get_size __ARGS((exarg_T *eap));
++int qf_get_cur_idx __ARGS((exarg_T *eap));
++int qf_get_cur_valid_idx __ARGS((exarg_T *eap));
+ /* vim: set ft=c : */
+diff -r 8840c1ae3b50 src/quickfix.c
+--- a/src/quickfix.c	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/quickfix.c	Fri Jul 24 20:23:43 2015 -0700
+@@ -2990,19 +2990,183 @@
+ }
+ 
+ /*
++ * Returns the number of valid entries in the current quickfix/location list
++ */
++    int
++qf_get_size(eap)
++    exarg_T	*eap;
++{
++    qf_info_T	*qi = &ql_info;
++    qfline_T	*qfp;
++    int		i, sz = 0;
++    int		prev_fnum = 0;
++
++    if (eap->cmdidx == CMD_ldo || eap->cmdidx == CMD_lfdo)
++    {
++	/* Location list */
++	qi = GET_LOC_LIST(curwin);
++	if (qi == NULL)
++	    return 0;
++    }
++
++    for (i = 0, qfp = qi->qf_lists[qi->qf_curlist].qf_start;
++	    (i < qi->qf_lists[qi->qf_curlist].qf_count) && (qfp != NULL);
++	    ++i, qfp = qfp->qf_next)
++    {
++	    if (qfp->qf_valid)
++	    {
++		if (eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo)
++		    sz++;	/* Count all valid entries */
++		else if (qfp->qf_fnum > 0 && qfp->qf_fnum != prev_fnum)
++		{
++		    /* Count the number of files */
++		    sz++;
++		    prev_fnum = qfp->qf_fnum;
++		}
++	    }
++    }
++
++    return sz;
++}
++
++/*
++ * Returns the current index of the quickfix/location list.
++ * Returns 0 if there is an error.
++ */
++    int
++qf_get_cur_idx(eap)
++    exarg_T	*eap;
++{
++    qf_info_T	*qi = &ql_info;
++
++    if (eap->cmdidx == CMD_ldo || eap->cmdidx == CMD_lfdo)
++    {
++	/* Location list */
++	qi = GET_LOC_LIST(curwin);
++	if (qi == NULL)
++	    return 0;
++    }
++
++    return qi->qf_lists[qi->qf_curlist].qf_index;
++}
++
++/*
++ * Returns the current index in the quickfix/location list (counting only valid
++ * entries). If no valid entries are in the list, then returns 1.
++ */
++    int
++qf_get_cur_valid_idx(eap)
++    exarg_T	*eap;
++{
++    qf_info_T	*qi = &ql_info;
++    qf_list_T	*qfl;
++    qfline_T	*qfp;
++    int		i, eidx = 0;
++    int		prev_fnum = 0;
++
++    if (eap->cmdidx == CMD_ldo || eap->cmdidx == CMD_lfdo)
++    {
++	/* Location list */
++	qi = GET_LOC_LIST(curwin);
++	if (qi == NULL)
++	    return 1;
++    }
++
++    qfl = &qi->qf_lists[qi->qf_curlist];
++    qfp = qfl->qf_start;
++
++    /* check if the list has valid errors */
++    if (qfl->qf_count <= 0 || qfl->qf_nonevalid)
++	return 1;
++
++    for (i = 1; i <= qfl->qf_index && qfp!= NULL; i++, qfp = qfp->qf_next)
++    {
++	if (qfp->qf_valid)
++	{
++	    if (eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo)
++	    {
++		if (qfp->qf_fnum > 0 && qfp->qf_fnum != prev_fnum)
++		{
++		    /* Count the number of files */
++		    eidx++;
++		    prev_fnum = qfp->qf_fnum;
++		}
++	    }
++	    else
++		eidx++;
++	}
++    }
++
++    return eidx ? eidx : 1;
++}
++
++/*
++ * Get the 'n'th valid error entry in the quickfix or location list.
++ * Used by :cdo, :ldo, :cfdo and :lfdo commands.
++ * For :cdo and :ldo returns the 'n'th valid error entry.
++ * For :cfdo and :lfdo returns the 'n'th valid file entry.
++ */
++    static int
++qf_get_nth_valid_entry(qi, n, fdo)
++    qf_info_T	*qi;
++    int		n;
++    int		fdo;
++{
++    qf_list_T	*qfl = &qi->qf_lists[qi->qf_curlist];
++    qfline_T	*qfp = qfl->qf_start;
++    int		i, eidx;
++    int		prev_fnum = 0;
++
++    /* check if the list has valid errors */
++    if (qfl->qf_count <= 0 || qfl->qf_nonevalid)
++	return 1;
++
++    for (i = 1, eidx = 0; i <= qfl->qf_count && qfp!= NULL;
++	    i++, qfp = qfp->qf_next)
++    {
++	if (qfp->qf_valid)
++	{
++	    if (fdo)
++	    {
++		if (qfp->qf_fnum > 0 && qfp->qf_fnum != prev_fnum)
++		{
++		    /* Count the number of files */
++		    eidx++;
++		    prev_fnum = qfp->qf_fnum;
++		}
++	    }
++	    else
++		eidx++;
++	}
++
++	if (eidx == n)
++	    break;
++    }
++
++    if (i <= qfl->qf_count)
++	return i;
++    else
++	return 1;
++}
++
++/*
+  * ":cc", ":crewind", ":cfirst" and ":clast".
+  * ":ll", ":lrewind", ":lfirst" and ":llast".
++ * ":cdo", ":ldo", ":cfdo" and ":lfdo"
+  */
+     void
+ ex_cc(eap)
+     exarg_T	*eap;
+ {
+     qf_info_T	*qi = &ql_info;
++    int		errornr;
+ 
+     if (eap->cmdidx == CMD_ll
+ 	    || eap->cmdidx == CMD_lrewind
+ 	    || eap->cmdidx == CMD_lfirst
+-	    || eap->cmdidx == CMD_llast)
++	    || eap->cmdidx == CMD_llast
++	    || eap->cmdidx == CMD_ldo
++	    || eap->cmdidx == CMD_lfdo)
+     {
+ 	qi = GET_LOC_LIST(curwin);
+ 	if (qi == NULL)
+@@ -3012,34 +3176,51 @@
+ 	}
+     }
+ 
+-    qf_jump(qi, 0,
+-	    eap->addr_count > 0
+-	    ? (int)eap->line2
+-	    : (eap->cmdidx == CMD_cc || eap->cmdidx == CMD_ll)
+-		? 0
+-		: (eap->cmdidx == CMD_crewind || eap->cmdidx == CMD_lrewind
+-		   || eap->cmdidx == CMD_cfirst || eap->cmdidx == CMD_lfirst)
+-		    ? 1
+-		    : 32767,
+-	    eap->forceit);
++    if (eap->addr_count > 0)
++	errornr = (int)eap->line2;
++    else
++    {
++	if (eap->cmdidx == CMD_cc || eap->cmdidx == CMD_ll)
++	    errornr = 0;
++	else if (eap->cmdidx == CMD_crewind || eap->cmdidx == CMD_lrewind
++		|| eap->cmdidx == CMD_cfirst || eap->cmdidx == CMD_lfirst)
++	    errornr = 1;
++	else
++	    errornr = 32767;
++    }
++
++    /* For cdo and ldo commands, jump to the nth valid error.
++     * For cfdo and lfdo commands, jump to the nth valid file entry.
++     */
++    if (eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo ||
++	    eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo)
++	errornr = qf_get_nth_valid_entry(qi,
++		eap->addr_count > 0 ? (int)eap->line1 : 1,
++		eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo);
++
++    qf_jump(qi, 0, errornr, eap->forceit);
+ }
+ 
+ /*
+  * ":cnext", ":cnfile", ":cNext" and ":cprevious".
+  * ":lnext", ":lNext", ":lprevious", ":lnfile", ":lNfile" and ":lpfile".
++ * Also, used by ":cdo", ":ldo", ":cfdo" and ":lfdo" commands.
+  */
+     void
+ ex_cnext(eap)
+     exarg_T	*eap;
+ {
+     qf_info_T	*qi = &ql_info;
++    int		errornr;
+ 
+     if (eap->cmdidx == CMD_lnext
+ 	    || eap->cmdidx == CMD_lNext
+ 	    || eap->cmdidx == CMD_lprevious
+ 	    || eap->cmdidx == CMD_lnfile
+ 	    || eap->cmdidx == CMD_lNfile
+-	    || eap->cmdidx == CMD_lpfile)
++	    || eap->cmdidx == CMD_lpfile
++	    || eap->cmdidx == CMD_ldo
++	    || eap->cmdidx == CMD_lfdo)
+     {
+ 	qi = GET_LOC_LIST(curwin);
+ 	if (qi == NULL)
+@@ -3049,15 +3230,24 @@
+ 	}
+     }
+ 
+-    qf_jump(qi, (eap->cmdidx == CMD_cnext || eap->cmdidx == CMD_lnext)
++    if (eap->addr_count > 0 &&
++	    (eap->cmdidx != CMD_cdo && eap->cmdidx != CMD_ldo &&
++	     eap->cmdidx != CMD_cfdo && eap->cmdidx != CMD_lfdo))
++	errornr = (int)eap->line2;
++    else
++	errornr = 1;
++
++    qf_jump(qi, (eap->cmdidx == CMD_cnext || eap->cmdidx == CMD_lnext
++		|| eap->cmdidx == CMD_cdo || eap->cmdidx == CMD_ldo)
+ 	    ? FORWARD
+-	    : (eap->cmdidx == CMD_cnfile || eap->cmdidx == CMD_lnfile)
++	    : (eap->cmdidx == CMD_cnfile || eap->cmdidx == CMD_lnfile
++		|| eap->cmdidx == CMD_cfdo || eap->cmdidx == CMD_lfdo)
+ 		? FORWARD_FILE
+ 		: (eap->cmdidx == CMD_cpfile || eap->cmdidx == CMD_lpfile
+ 		   || eap->cmdidx == CMD_cNfile || eap->cmdidx == CMD_lNfile)
+ 		    ? BACKWARD_FILE
+ 		    : BACKWARD,
+-	    eap->addr_count > 0 ? (int)eap->line2 : 1, eap->forceit);
++	    errornr, eap->forceit);
+ }
+ 
+ /*
+diff -r 8840c1ae3b50 src/testdir/Make_amiga.mak
+--- a/src/testdir/Make_amiga.mak	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/testdir/Make_amiga.mak	Fri Jul 24 20:23:43 2015 -0700
+@@ -64,7 +64,8 @@
+ 		test_set.out \
+ 		test_signs.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_cdo.out
+ 
+ .SUFFIXES: .in .out
+ 
+@@ -217,3 +218,4 @@
+ test_signs.out: test_signs.in
+ test_textobjects.out: test_textobjects.in
+ test_utf8.out: test_utf8.in
++test_cdo.out: test_cdo.in
+diff -r 8840c1ae3b50 src/testdir/Make_dos.mak
+--- a/src/testdir/Make_dos.mak	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/testdir/Make_dos.mak	Fri Jul 24 20:23:43 2015 -0700
+@@ -63,7 +63,8 @@
+ 		test_set.out \
+ 		test_signs.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_cdo.out
+ 
+ SCRIPTS32 =	test50.out test70.out
+ 
+diff -r 8840c1ae3b50 src/testdir/Make_ming.mak
+--- a/src/testdir/Make_ming.mak	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/testdir/Make_ming.mak	Fri Jul 24 20:23:43 2015 -0700
+@@ -85,7 +85,8 @@
+ 		test_set.out \
+ 		test_signs.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_cdo.out
+ 
+ SCRIPTS32 =	test50.out test70.out
+ 
+diff -r 8840c1ae3b50 src/testdir/Make_os2.mak
+--- a/src/testdir/Make_os2.mak	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/testdir/Make_os2.mak	Fri Jul 24 20:23:43 2015 -0700
+@@ -65,7 +65,8 @@
+ 		test_set.out \
+ 		test_signs.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_cdo.out
+ 
+ SCRIPTS_BENCH = bench_re_freeze.out
+ 
+diff -r 8840c1ae3b50 src/testdir/Make_vms.mms
+--- a/src/testdir/Make_vms.mms	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/testdir/Make_vms.mms	Fri Jul 24 20:23:43 2015 -0700
+@@ -124,7 +124,8 @@
+ 	 test_set.out \
+ 	 test_signs.out \
+ 	 test_textobjects.out \
+-	 test_utf8.out
++	 test_utf8.out \
++	 test_cdo.out
+ 
+ # Known problems:
+ # test17: ?
+diff -r 8840c1ae3b50 src/testdir/Makefile
+--- a/src/testdir/Makefile	Wed Jul 22 22:46:14 2015 +0200
++++ b/src/testdir/Makefile	Fri Jul 24 20:23:43 2015 -0700
+@@ -61,7 +61,8 @@
+ 		test_set.out \
+ 		test_signs.out \
+ 		test_textobjects.out \
+-		test_utf8.out
++		test_utf8.out \
++		test_cdo.out
+ 
+ SCRIPTS_GUI = test16.out
+ 
+diff -r 8840c1ae3b50 src/testdir/test_cdo.in
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/src/testdir/test_cdo.in	Fri Jul 24 20:23:43 2015 -0700
+@@ -0,0 +1,97 @@
++Tests for the :cdo, :cfdo, :ldo and :lfdo commands
++
++STARTTEST
++:so small.vim
++:if !has('quickfix') | e! test.ok | wq! test.out | endif
++
++:call writefile(["Line1", "Line2", "Line3"], 'Xtestfile1')
++:call writefile(["Line1", "Line2", "Line3"], 'Xtestfile2')
++:call writefile(["Line1", "Line2", "Line3"], 'Xtestfile3')
++
++:function RunTests(cchar)
++:  let nl="\n"
++
++:  enew
++:  " Try with an empty list
++:  exe a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++
++:  " Populate the list and then try
++:  exe a:cchar . "getexpr ['non-error 1', 'Xtestfile1:1:3:Line1', 'non-error 2', 'Xtestfile2:2:2:Line2', 'non-error 3', 'Xtestfile3:3:1:Line3']"
++:  exe a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++
++:  " Run command only on selected error lines
++:  enew
++:  exe "2,3" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  " Boundary condition tests
++:  enew
++:  exe "1,1" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  enew
++:  exe "3" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  " Range test commands
++:  enew
++:  exe "%" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  enew
++:  exe "1,$" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  enew
++:  exe a:cchar . 'prev'
++:  exe "." . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  " Invalid error lines test
++:  enew
++:  exe "27" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "4,5" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++
++:  " Run commands from an unsaved buffer
++:  let v:errmsg=''
++:  enew
++:  setlocal modified
++:  exe "2,2" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  if v:errmsg =~# 'No write since last change'
++:     let g:result .= 'Unsaved file change test passed' . nl
++:  else
++:     let g:result .= 'Unsaved file change test failed' . nl
++:  endif
++
++:  exe "2,2" . a:cchar . "do! let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++
++:  " List with no valid error entries
++:  edit! +2 Xtestfile1
++:  exe a:cchar . "getexpr ['non-error 1', 'non-error 2', 'non-error 3']"
++:  exe a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "2" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  let v:errmsg=''
++:  exe "%" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "1,$" . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "." . a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  let g:result .= v:errmsg
++
++:  " List with only one valid entry
++:  exe a:cchar . "getexpr ['Xtestfile3:3:1:Line3']"
++:  exe a:cchar . "do let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++
++:  " Tests for :cfdo and :lfdo commands
++:  exe a:cchar . "getexpr ['non-error 1', 'Xtestfile1:1:3:Line1', 'Xtestfile1:2:1:Line2', 'non-error 2', 'Xtestfile2:2:2:Line2', 'non-error 3', 'Xtestfile3:2:3:Line2', 'Xtestfile3:3:1:Line3']"
++:  exe a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "3" . a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "2,3" . a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "%" . a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe "1,$" . a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:  exe a:cchar . 'pfile'
++:  exe "." . a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++
++:  " List with only one valid entry
++:  exe a:cchar . "getexpr ['Xtestfile2:2:5:Line2']"
++:  exe a:cchar . "fdo let g:result .= expand('%') . ' ' . line('.') . 'L' . ' ' . col('.') . 'C' . nl"
++:endfunction
++
++:let result=''
++:" Tests for the :cdo quickfix list command
++:call RunTests('c')
++:let result .= "\n"
++:" Tests for the :ldo location list command
++:call RunTests('l')
++
++:edit! test.out
++:0put =result
++:wq!
++ENDTEST
++
+diff -r 8840c1ae3b50 src/testdir/test_cdo.ok
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/src/testdir/test_cdo.ok	Fri Jul 24 20:23:43 2015 -0700
+@@ -0,0 +1,64 @@
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile2 2L 2C
++Unsaved file change test passed
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile3 2L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile2 2L 2C
++Xtestfile2 2L 5C
++
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile2 2L 2C
++Unsaved file change test passed
++Xtestfile2 2L 2C
++Xtestfile3 3L 1C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile3 2L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile1 1L 3C
++Xtestfile2 2L 2C
++Xtestfile3 2L 3C
++Xtestfile2 2L 2C
++Xtestfile2 2L 5C
++
