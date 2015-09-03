@@ -1,10 +1,10 @@
 Use this command to install a patched version of Vim:
 
-    brew install nelstrom/homebrew-vim/vim
+    brew install nelstrom/homebrew-vim/vim --with-cdo
 
 If that doesn't work, try this instead:
 
-    brew install nelstrom/vim/vim
+    brew install nelstrom/vim/vim --with-cdo
 
 This formula is based on [the standard Homebrew formula][formula] for Vim, but it has been modified to include a [patch][] that adds a few new commands: `:cdo`, `:cfdo`, `:ldo`, and `:lfdo`.
 
