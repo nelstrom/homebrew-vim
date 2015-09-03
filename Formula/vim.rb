@@ -41,7 +41,7 @@ class Vim < Formula
   # https://groups.google.com/d/msg/vim_dev/dfyt-G6SMec/fYjv0Afq1l4J
   patch do
     url "https://raw.githubusercontent.com/nelstrom/homebrew-vim/master/patches/cdo.diff"
-    sha265 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
+    sha256 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
   end if build.with? "cdo"
 
   def install
