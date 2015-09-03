@@ -75,6 +75,11 @@ class Vim < Formula
       opts << "--enable-luainterp"
     end
 
+    patch do
+      url "https://raw.githubusercontent.com/nelstrom/homebrew-vim/master/patches/cdo.diff"
+      sha265 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
+    end
+
     # XXX: Please do not submit a pull request that hardcodes the path
     # to ruby: vim can be compiled against 1.8.x or 1.9.3-p385 and up.
     # If you have problems with vim because of ruby, ensure a compatible
