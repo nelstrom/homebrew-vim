@@ -1,3 +1,17 @@
+## Update!
+
+The cdo patch has now been folded into core Vim as [Patch 858](https://github.com/vim/vim/commit/aa23b379421aa214e6543b06c974594a25799b09) 
+
+I've updated this tap+formula to install Vim 7.4.861 when you run:
+
+    brew install nelstrom/vim/vim
+
+(The instructions below should still work, but you can omit the `--with-cdo`.)
+
+---
+
+## [Original instructions]
+
 Use this command to install a patched version of Vim:
 
     brew install nelstrom/vim/vim --with-cdo
