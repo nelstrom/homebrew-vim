@@ -4,11 +4,7 @@ Use this command to install a patched version of Vim:
 
 This formula is based on [the standard Homebrew formula][formula] for Vim, but it has been modified to include a [patch][] that adds a few new commands: `:cdo`, `:cfdo`, `:ldo`, and `:lfdo`.
 
-Check out the talk I gave at Vim London: [Meet the :cdo and :cfdo commands][video]
-
-[patch]: https://groups.google.com/d/msg/vim_dev/dfyt-G6SMec/fYjv0Afq1l4J
-[formula]: https://github.com/Homebrew/homebrew/blob/master/Library/Formula/vim.rb
-[video]: https://vimeo.com/132367070
+You can check if the install worked by launching Vim and running `:help :cdo`. If Vim shows you the documentation for that command, you're good!
 
 ## What if I've already installed Vim using homebrew?
 
@@ -30,3 +26,13 @@ Then install the standard homebrew issue of Vim again as follows:
     brew install vim
 
 Now you're back to where you started.
+
+## What's so good about this patch?
+
+I discussed these new features at the Vim London meetup in June 2015.
+You can watch the talk on Vimeo: [Meet the :cdo and :cfdo commands][video]
+
+[patch]: https://groups.google.com/d/msg/vim_dev/dfyt-G6SMec/fYjv0Afq1l4J
+[formula]: https://github.com/Homebrew/homebrew/blob/master/Library/Formula/vim.rb
+[video]: https://vimeo.com/132367070
+
