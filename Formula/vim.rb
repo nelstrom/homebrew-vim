@@ -1,9 +1,8 @@
 class Vim < Formula
   desc "Vi \"workalike\" with many additional features"
   homepage "http://www.vim.org/"
-  # This package tracks debian-unstable: https://packages.debian.org/unstable/vim
-  url "https://mirrors.kernel.org/debian/pool/main/v/vim/vim_7.4.826.orig.tar.gz"
-  sha256 "02f07b60eff53f45d58686e43b72e83aa8f24a94acfa69b95fa84dc020671a38"
+  url "https://github.com/vim/vim/archive/v7.4.861.tar.gz"
+  sha256 "fc24e318073db486bf99204eca8cdfd71174810c327c42cc20aad941858d1636"
   head "https://github.com/vim/vim.git"
 
   # We only have special support for finding depends_on :python, but not yet for
@@ -35,14 +34,6 @@ class Vim < Formula
 
   conflicts_with "ex-vi",
     :because => "vim and ex-vi both install bin/ex and bin/view"
-
-  # This patch was authored by Yegappan.
-  # It adds adds four commands to Vim: :cdo, :cfdo, :ldo, and :lfdo
-  # https://groups.google.com/d/msg/vim_dev/dfyt-G6SMec/fYjv0Afq1l4J
-  patch do
-    url "https://raw.githubusercontent.com/nelstrom/homebrew-vim/master/patches/cdo.diff"
-    sha256 "e77b27c6807fe8df4ec95e4413174cea137c4bbd2997ed5d899f19bdb777e83e"
-  end if build.with? "cdo"
 
   def install
     ENV["LUA_PREFIX"] = HOMEBREW_PREFIX if build.with?("lua") || build.with?("luajit")
