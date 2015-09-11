@@ -1,4 +1,12 @@
-## Update!
+## Update (11 September 2015)
+
+Homebrew's Vim formula has been [updated to Vim 7.4.865](https://github.com/Homebrew/homebrew/pull/43753). You can now install Vim with the `:cdo` functionality just by running a standard:
+
+    brew install vim
+
+This tap+formula are now redundant. I'll leave this repo intact until end of September 2015.
+
+## Update (9 September 2015)
 
 The cdo patch has now been folded into core Vim as [Patch 858](https://github.com/vim/vim/commit/aa23b379421aa214e6543b06c974594a25799b09) 
 
